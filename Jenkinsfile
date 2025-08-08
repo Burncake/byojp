@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        DOCKER_IMAGE = "your-dockerhub-username/${params.USER_ID}-simple-webapp"
+        DOCKER_IMAGE = "22127422/${params.USER_ID.toLowerCase()}-simple-webapp"
     }
 
     stages {
