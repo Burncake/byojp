@@ -31,10 +31,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    def allocatedPort = ""
-                    wrap([$class: 'PortAllocator', port: 'DEPLOY_PORT', pool: 'default']) {
-                        allocatedPort = env.DEPLOY_PORT
-                    }
+                    def allocatedPort = allocatePort(pool: 'default').port
+                    
                     def containerName = "${params.USER_ID.toLowerCase()}-webapp"
                     
                     echo "Deploying container '${containerName}' to port ${allocatedPort}"
