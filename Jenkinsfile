@@ -7,14 +7,13 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         DOCKER_IMAGE = "22127422/${params.USER_ID.toLowerCase()}-simple-webapp"
     }
 
     stages {
         stage('Build') {
             steps {
-                echo "Building the Docker image for ${params.USER_ID}"
+                echo "Building the Docker image for ${params.USER_ID.toLowerCase()}"
                 script {
                     docker.build(DOCKER_IMAGE, "--build-arg WEBSITE_FILE=${params.WEBSITE_FILE} .")
                 }
@@ -23,7 +22,7 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
                         docker.image(DOCKER_IMAGE).push("latest")
                     }
                 }
@@ -36,10 +35,13 @@ pipeline {
                     wrap([$class: 'PortAllocator', port: 'DEPLOY_PORT', pool: 'default']) {
                         allocatedPort = env.DEPLOY_PORT
                     }
-                    echo "Deploying container to port ${allocatedPort}"
-                    sh "docker stop ${params.USER_ID}-webapp || true"
-                    sh "docker rm ${params.USER_ID}-webapp || true"
-                    sh "docker run -d --name ${params.USER_ID}-webapp -p ${allocatedPort}:5000 -e WEBSITE_FILENAME=${params.WEBSITE_FILE} ${DOCKER_IMAGE}"
+                    def containerName = "${params.USER_ID.toLowerCase()}-webapp"
+                    
+                    echo "Deploying container '${containerName}' to port ${allocatedPort}"
+
+                    sh "docker stop ${containerName} || true"
+                    sh "docker rm ${containerName} || true"
+                    sh "docker run -d --name ${containerName} -p ${allocatedPort}:5000 -e WEBSITE_FILENAME=${params.WEBSITE_FILE} ${DOCKER_IMAGE}"
                 }
             }
         }
