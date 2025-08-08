@@ -13,7 +13,6 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo "Building the Docker image for ${params.USER_ID.toLowerCase()}"
                 script {
                     docker.build(DOCKER_IMAGE, "--build-arg WEBSITE_FILE=${params.WEBSITE_FILE} .")
                 }
@@ -30,16 +29,16 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                script {
-                    def allocatedPort = allocatePort(pool: 'default').port
-                    
-                    def containerName = "${params.USER_ID.toLowerCase()}-webapp"
-                    
-                    echo "Deploying container '${containerName}' to port ${allocatedPort}"
+                wrap([$class: 'PortAllocator', port: 'DEPLOY_PORT', pool: 'default']) {
+                    script {
+                        def containerName = "${params.USER_ID.toLowerCase()}-webapp"
+                        
+                        echo "Deploying container '${containerName}' to port ${env.DEPLOY_PORT}"
 
-                    sh "docker stop ${containerName} || true"
-                    sh "docker rm ${containerName} || true"
-                    sh "docker run -d --name ${containerName} -p ${allocatedPort}:5000 -e WEBSITE_FILENAME=${params.WEBSITE_FILE} ${DOCKER_IMAGE}"
+                        sh "docker stop ${containerName} || true"
+                        sh "docker rm ${containerName} || true"
+                        sh "docker run -d --name ${containerName} -p ${env.DEPLOY_PORT}:5000 -e WEBSITE_FILENAME=${params.WEBSITE_FILE} ${DOCKER_IMAGE}"
+                    }
                 }
             }
         }
