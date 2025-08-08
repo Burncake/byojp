@@ -29,16 +29,22 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                wrap([$class: 'PortAllocator', port: 'DEPLOY_PORT', pool: 'default']) {
-                    script {
-                        def containerName = "${params.USER_ID.toLowerCase()}-webapp"
-                        
-                        echo "Deploying container '${containerName}' to port ${env.DEPLOY_PORT}"
+                script {
+                    // --- THE RELIABLE PORT ALLOCATION LOGIC ---
+                    // 1. Define the base port and range
+                    def basePort = 50000
+                    def portRange = 1000
+                    // 2. Generate a unique, consistent port from the user's ID
+                    def allocatedPort = basePort + (Math.abs(params.USER_ID.toLowerCase().hashCode()) % portRange)
+                    
+                    def containerName = "${params.USER_ID.toLowerCase()}-webapp"
+                    
+                    echo "Deploying container '${containerName}' to generated port ${allocatedPort}"
 
-                        sh "docker stop ${containerName} || true"
-                        sh "docker rm ${containerName} || true"
-                        sh "docker run -d --name ${containerName} -p ${env.DEPLOY_PORT}:5000 -e WEBSITE_FILENAME=${params.WEBSITE_FILE} ${DOCKER_IMAGE}"
-                    }
+                    // 3. Use the generated port to run the container
+                    sh "docker stop ${containerName} || true"
+                    sh "docker rm ${containerName} || true"
+                    sh "docker run -d --name ${containerName} -p ${allocatedPort}:5000 -e WEBSITE_FILENAME=${params.WEBSITE_FILE} ${DOCKER_IMAGE}"
                 }
             }
         }
