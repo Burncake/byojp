@@ -1,9 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Site 2</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CD and Peanut</title>
+    <!-- Use Tailwind CSS for a modern, responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            transition: background-color 0.3s ease;
+        }
+        .container {
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body>
-    <h1>This is Site 2</h1>
+<body class="flex items-center justify-center min-h-screen">
+
+    <!-- Main application container -->
+    <div class="container bg-white p-8 sm:p-12 rounded-3xl shadow-2xl max-w-lg w-full flex flex-col items-center text-center transition-all duration-500 transform scale-95 md:scale-100">
+
+        <!-- Display area for text and images -->
+        <div id="content-display" class="fade-in mb-8 min-h-[150px] flex items-center justify-center">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Triển khai xong CD chưa</h1>
+        </div>
+
+        <!-- Action button -->
+        <button id="action-button" class="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-purple-300">
+            CD gì?
+        </button>
+
+    </div>
+
+    <!-- JavaScript logic -->
+    <script>
+        // Get references to the HTML elements
+        const contentDisplay = document.getElementById('content-display');
+        const actionButton = document.getElementById('action-button');
+
+        // State variable to track the current step
+        let step = 1;
+
+        // Function to update the UI based on the current step
+        function updateUI() {
+            // Add fade-in effect by removing and re-adding the class
+            contentDisplay.classList.remove('fade-in');
+            void contentDisplay.offsetWidth; // Trigger reflow to restart animation
+            contentDisplay.classList.add('fade-in');
+
+            switch (step) {
+                case 1:
+                    contentDisplay.innerHTML = '<h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Triển khai xong CD chưa?</h1>';
+                    actionButton.textContent = 'CD gì';
+                    break;
+                case 2:
+                    contentDisplay.innerHTML = `
+                        <div class="flex items-center space-x-4 sm:space-x-8">
+                            <img src="https://previews.123rf.com/images/omkar/omkar1006/omkar100600050/7108457-cd-word-in-alphabet-puzzle.jpg" alt="CD" class="h-24 sm:h-32 object-contain" onerror="this.onerror=null;this.src='https://placehold.co/128x128/E5E7EB/1F2937?text=CD'">
+                            <img src="https://allergyfacts.org.au/wp-content/uploads/Peanut_600px_NoBKG.png" alt="nuts" class="h-24 sm:h-32 object-contain" onerror="this.onerror=null;this.src='https://placehold.co/128x128/E5E7EB/1F2937?text=Peanut'">
+                        </div>
+                    `;
+                    // Hide the button after the last step
+                    actionButton.style.display = 'none';
+                    break;
+            }
+        }
+
+        // Add a click event listener to the main button
+        actionButton.addEventListener('click', () => {
+            // Increment the step and update the UI
+            if (step < 2) {
+                step++;
+                updateUI();
+            }
+        });
+
+        // Initialize the UI on page load
+        document.addEventListener('DOMContentLoaded', updateUI);
+    </script>
 </body>
 </html>
